@@ -25,7 +25,8 @@ deck.setSkin(skinById(state.premium ? state.skin : 'noir'));
 
 let queue = [];
 let index = -1;
-let results = [];
+const DEMO = { id: 'demo:1', source: 'local', title: 'Кофе в 7 утра', artist: 'Vinil · демо-трек', artwork: '', duration: 36, url: new URL('../assets/demo.wav', import.meta.url).href };
+let results = [DEMO];
 
 // ---------------- engine → UI ----------------
 const STATE_LABEL = {
@@ -221,7 +222,12 @@ $('#playlists').addEventListener('click', (e) => {
   const act = e.target.closest('[data-act]')?.dataset.act;
   const row = e.target.closest('.trk');
   if (act === 'playall') return playNowList(p.tracks);
-  if (act === 'del') { if (confirm(`Удалить «${p.name}»?`)) { store.deletePlaylist(p.id); renderPlaylists(); } return; }
+  if (act === 'del') {
+    const b = e.target.closest('[data-act]');
+    if (b.dataset.armed) { store.deletePlaylist(p.id); renderPlaylists(); }
+    else { b.dataset.armed = '1'; toast(`Нажмите ещё раз, чтобы удалить «${p.name}»`); setTimeout(() => delete b.dataset.armed, 3000); }
+    return;
+  }
   if (!row) return;
   const i = +row.dataset.i;
   if (act === 'x') { store.removeFromPlaylist(p.id, p.tracks[i].id); renderPlaylists(); }
@@ -323,7 +329,7 @@ function toast(msg) {
 }
 
 // ---------------- boot ----------------
-renderPlays(); renderQueue(); renderPlaylists(); renderSkins(); paintRange(seek);
+renderPlays(); renderQueue(); renderPlaylists(); renderSkins(); renderResults(); paintRange(seek);
 document.fonts?.ready.then(() => { deck.setMeta(deck.meta); renderSkins(); });
 
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
