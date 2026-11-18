@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Vinil</title>
+  <meta name="description" content="Любая музыка — со звуком виниловой пластинки" />
+  <meta name="theme-color" content="#E9E0D0" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <main class="app">
+    <section class="stage" id="stage" aria-label="Проигрыватель"></section>
+
+    <section class="now" aria-live="polite">
+      <div class="now-top">
+        <span class="brand">VINIL<span class="brand-sub">FILE_01 //</span></span>
+        <button class="stamp" id="playsLeft" type="button" title="Треков осталось сегодня"></button>
+      </div>
+      <p class="kicker"><span id="stateTag">ПЛАСТИНКА НЕ СТОИТ</span><span id="srcTag"></span></p>
+      <h1 id="title">Поставьте пластинку</h1>
+      <p id="artist" class="artist">Найдите песню во вкладке «Поиск»</p>
+      <div class="progress">
+        <span id="tCur">0:00</span>
+        <input id="seek" type="range" min="0" max="1000" value="0" aria-label="Позиция в треке" />
+        <span id="tDur">0:00</span>
+      </div>
+      <div class="controls">
+        <button class="ctl" id="prev" type="button" aria-label="Предыдущий"><svg viewBox="0 0 24 24"><path d="M6 5h2v14H6zM20 5v14L9 12z"/></svg></button>
+        <button class="ctl big" id="play" type="button" aria-label="Играть"><svg viewBox="0 0 24 24" class="i-play"><path d="M7 4.5v15l13-7.5z"/></svg><svg viewBox="0 0 24 24" class="i-pause"><path d="M6 4h4.5v16H6zM13.5 4H18v16h-4.5z"/></svg></button>
+        <button class="ctl" id="next" type="button" aria-label="Следующий"><svg viewBox="0 0 24 24"><path d="M16 5h2v14h-2zM4 5v14l11-7z"/></svg></button>
+      </div>
+    </section>
+
+    <nav class="tabs" role="tablist">
+      <button role="tab" class="tab" data-tab="search" style="--tab: var(--sky)" aria-selected="true"><i>01 //</i>Поиск</button>
+      <button role="tab" class="tab" data-tab="queue" style="--tab: var(--olive)"><i>02 //</i>Очередь</button>
+      <button role="tab" class="tab" data-tab="lists" style="--tab: var(--walnut)"><i>03 //</i>Плейлисты</button>
+      <button role="tab" class="tab" data-tab="deck" style="--tab: var(--cinnamon)"><i>04 //</i>Пластинка</button>
+    </nav>
+
+    <section class="pane" data-pane="search" style="--tab: var(--sky)">
+      <form id="searchForm" class="search">
+        <input id="q" type="search" placeholder="Исполнитель, песня, жанр…" autocomplete="off" />
+        <button type="submit" class="btn">Найти</button>
+      </form>
+      <div class="chips">
+        <label class="chip"><input type="checkbox" name="src" value="audius" checked /> Audius</label>
+        <label class="chip"><input type="checkbox" name="src" value="archive" checked /> Internet Archive</label>
+        <label class="chip file"><input id="fileInput" type="file" accept="audio/*" multiple hidden /> + Свой файл</label>
+      </div>
+      <div id="results" class="list"><p class="empty">Ищите среди миллионов открытых треков<br/>или загрузите свой mp3 — он тоже зазвучит как с пластинки.</p></div>
+    </section>
+
+    <section class="pane" data-pane="queue" style="--tab: var(--olive)" hidden>
+      <div class="pane-head"><h2>Очередь</h2><button class="btn ghost" id="clearQueue" type="button">Очистить</button></div>
+      <div id="queueList" class="list"></div>
+    </section>
+
+    <section class="pane" data-pane="lists" style="--tab: var(--walnut)" hidden>
+      <form id="newList" class="search">
+        <input id="newListName" placeholder="Название нового плейлиста" />
+        <button class="btn" type="submit">Создать</button>
+      </form>
+      <div id="playlists"></div>
+    </section>
+
+    <section class="pane" data-pane="deck" style="--tab: var(--cinnamon)" hidden>
+      <h2>Звук</h2>
+      <div class="mixer">
+        <label class="row switch"><span>Эффект пластинки</span><input type="checkbox" id="fx" /></label>
+        <label class="row"><span>Треск и шум</span><input type="range" id="crackle" min="0" max="1" step="0.01" /></label>
+        <label class="row"><span>Громкость</span><input type="range" id="volume" min="0" max="1" step="0.01" /></label>
+      </div>
+      <div class="pane-head"><h2>Цвет пластинки</h2><span class="tag-plus" id="plusBadge">PLUS</span></div>
+      <div id="skins" class="skins"></div>
+      <div class="plus-card" id="plusCard"></div>
+    </section>
+  </main>
+
+  <dialog id="paywall" class="sheet">
+    <form method="dialog">
+      <p class="kicker" id="pwKicker">VINIL PLUS //</p>
+      <h2 id="pwTitle">Больше пластинок</h2>
+      <p id="pwText"></p>
+      <ul class="perks">
+        <li>Безлимитное прослушивание</li>
+        <li>Все 11 цветов пластинки — медь, мрамор, сплит, брызги</li>
+        <li>Поддержка будущих функций: свои этикетки, эффекты разных эпох</li>
+      </ul>
+      <div class="sheet-actions">
+        <button class="btn" value="buy" id="pwBuy">Попробовать Plus — 199 ₽/мес</button>
+        <button class="btn ghost" value="close">Позже</button>
+      </div>
+      <p class="fine">Прототип: оплата не подключена, кнопка просто включает демо-режим.</p>
+    </form>
+  </dialog>
+
+  <dialog id="addTo" class="sheet small">
+    <form method="dialog">
+      <h2>В плейлист</h2>
+      <div id="addToList" class="addto"></div>
+      <div class="sheet-actions"><button class="btn ghost" value="close">Закрыть</button></div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast" role="status"></div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
